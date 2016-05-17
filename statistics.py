@@ -9,6 +9,8 @@ def write_to_file(datamap, filename):
     file.write(json.dumps(datamap))
     file.close()
 
+counter = 0
+
 # Per clientip prefix, count and geoip data 
 clientips = {}
 
@@ -61,6 +63,10 @@ for line in sys.stdin:
     	    referrers[obj['referrer']] += 1
         else:
     	    referrers[obj['referrer']] = 1
+
+        counter += 1
+        if counter % 1000000 == 0:
+            print "Processed %d records" % counter
 
     except ValueError:
         pass
