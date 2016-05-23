@@ -64,13 +64,18 @@ for line in sys.stdin:
         else:
             agent = obj['agent']
 
-        if agent in agents:
-    	    agents[agent]['count'] += 1
+        if agent == "-":
+            agent_key = "underscore_"
+        else:
+            agent_key = agent
+
+        if agent_key in agents:
+    	    agents[agent_key]['count'] += 1
         else :
-    	    agents[agent] = {}
-    	    agents[agent]['count'] = 1
-            agents[agent]['agent'] = agent
-    	    agents[agent]['useragent'] = obj['useragent']
+    	    agents[agent_key] = {}
+    	    agents[agent_key]['count'] = 1
+            agents[agent_key]['agent'] = agent
+    	    agents[agent_key]['useragent'] = obj['useragent']
     
         if obj['referrer'].startswith('"') and obj['referrer'].endswith('"'):
             referrer = obj['referrer'][1:-1]
