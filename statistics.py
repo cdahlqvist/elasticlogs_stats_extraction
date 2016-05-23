@@ -9,6 +9,14 @@ def write_to_file(datamap, filename):
     file.write(json.dumps(datamap))
     file.close()
 
+def dict_to_list (datamap):
+    objlist = []
+
+    for key, value in datamap.iteritems():
+        objlist.append(value)
+
+    return objlist
+
 counter = 0
 
 # Per clientip prefix, count and geoip data 
@@ -28,14 +36,14 @@ for line in sys.stdin:
         obj = json.loads(line)
 
         if 'geoip' in obj:
-            clientip_prefix = re.search(r'^(\d+\.\d+\.\d+)', obj['clientip']).group()
-            
-            if clientip_prefix in clientips:
-                clientips[clientip_prefix]['count'] += 1
+            if obj['clientip'] in clientips:
+                clientips[obj['clientip']]['count'] += 1
             else :
-                clientips[clientip_prefix] = {}
-                clientips[clientip_prefix]['count'] = 1
-            clientips[clientip_prefix]['geoip'] = obj['geoip']
+                clientips[obj['clientip']] = {}
+                clientips[obj['clientip']]['count'] = 1
+                clientips[obj['clientip']]['clientip'] = obj['clientip']
+                clientips[obj['clientip']]['geoip'] = obj['geoip']
+
 
         #request = obj['verb'] + " " + obj['httpversion'] + " " + obj['request'] + " " + obj['response'] + " " + obj['bytes']
         request = '{} {} {} {} {}'.format(obj['verb'], obj['request'], obj['httpversion'], obj['response'], obj['bytes'])
@@ -45,24 +53,41 @@ for line in sys.stdin:
         else:
     	    requests[request] = {}
             requests[request]['count'] = 1
-            requests[request]['data'] = {}
-            requests[request]['data']['verb'] = obj['verb']
-            requests[request]['data']['httpversion'] = obj['httpversion']
-            requests[request]['data']['request'] = obj['request']
-            requests[request]['data']['response'] = obj['response']
-            requests[request]['data']['bytes'] = obj['bytes']
+            requests[request]['verb'] = obj['verb']
+            requests[request]['httpversion'] = obj['httpversion']
+            requests[request]['request'] = obj['request']
+            requests[request]['response'] = obj['response']
+            requests[request]['bytes'] = obj['bytes']
 
-        if obj['agent'] in agents:
-    	    agents[obj['agent']]['count'] += 1
-        else :
-    	    agents[obj['agent']] = {}
-    	    agents[obj['agent']]['count'] = 1
-    	    agents[obj['agent']]['useragent'] = obj['useragent']
-    
-        if obj['referrer'] in referrers:
-    	    referrers[obj['referrer']] += 1
+        if obj['agent'].startswith('"') and obj['agent'].endswith('"'):
+            agent = obj['agent'][1:-1]
         else:
-    	    referrers[obj['referrer']] = 1
+            agent = obj['agent']
+
+        if agent in agents:
+    	    agents[agent]['count'] += 1
+        else :
+    	    agents[agent] = {}
+    	    agents[agent]['count'] = 1
+            agents[agent]['agent'] = agent
+    	    agents[agent]['useragent'] = obj['useragent']
+    
+        if obj['referrer'].startswith('"') and obj['referrer'].endswith('"'):
+            referrer = obj['referrer'][1:-1]
+        else:
+            referrer = obj['referrer']
+
+        if referrer == "-":
+            referrer_key = "underscore_"
+        else:
+            referrer_key = referrer
+
+        if referrer_key in referrers:
+    	    referrers[referrer_key]['count'] += 1
+        else:
+            referrers[referrer_key] = {}
+    	    referrers[referrer_key]['count'] = 1
+            referrers[referrer_key]['referrer'] = referrer
 
         counter += 1
         if counter % 1000000 == 0:
@@ -72,8 +97,8 @@ for line in sys.stdin:
         pass
 
 # Write all statistics to files in JSON format
-write_to_file(clientips, "clientips.json")
-write_to_file(agents, "agents.json")
-write_to_file(requests, "requests.json")
-write_to_file(referrers, "referrers.json")
+write_to_file(dict_to_list(clientips), "clientips.json")
+write_to_file(dict_to_list(agents), "agents.json")
+write_to_file(dict_to_list(requests), "requests.json")
+write_to_file(dict_to_list(referrers), "referrers.json")
 
