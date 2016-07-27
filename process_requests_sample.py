@@ -6,6 +6,9 @@ import re
 
 threshold = 200
 
+sample_size = 1000
+sample_count = 0
+
 inputfile = open('./statistics/requests.json', 'r')
 
 data = inputfile.read()
@@ -25,7 +28,8 @@ for value in obj:
     count = value['count']
     value.pop('count', None)
 
-    if count > threshold or (count> 10 and value['response'] != 200):
+    if (count > threshold or (count> 10 and value['response'] != 200)) and sample_count < sample_size:
+        sample_count += 1
         requests_count += count
         unique_requests_count += 1
 
@@ -57,7 +61,7 @@ for value in obj:
 # Reverse lookups
 path_lookup = {v: k for k, v in path_lookup.items()}
 
-outputfile = open('./config/requests_data.js', 'w')
+outputfile = open('./config/requests_data_sample.js', 'w')
 
 outputfile.write("/* Items in the requests list has the following structure: [<count>, <url base lookup id, <url suffix>, <bytes>, <verb> <response>, <httpversion>] */\n\n")
 outputfile.write("module.exports.requests = ")

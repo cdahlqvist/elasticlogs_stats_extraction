@@ -29,11 +29,11 @@ for value in obj:
         referrers_count += count
         unique_referrers_count += 1
 
-        m = re.match("^((.*/){1,4})(.*)", value['referrer'])
+        m = re.match("^((?:.*?/){1,5})(.*)", value['referrer'])
 
         if m:
-            path = m.groups()[0]
-            rest = m.groups()[1]
+            path = m.groups(1)[0]
+            rest = m.groups(1)[1]
 
         else:
             path = value['referrer']
@@ -62,7 +62,7 @@ outputfile = open('./config/referrers_data.js', 'w')
 outputfile.write("/* Items in the referrers list has the following structure: [<count>, <url lookup id>, <url suffix>] */\n\n")
 outputfile.write("module.exports.referrers = ")
 outputfile.write(json.dumps(referrers, separators=(',', ':')))
-outputfile.write(";\n\nmodule.exports.url_lookup = ")
+outputfile.write(";\n\nmodule.exports.url_base_lookup = ")
 outputfile.write(json.dumps(path_lookup, separators=(',', ':')))
 outputfile.write(";")
 

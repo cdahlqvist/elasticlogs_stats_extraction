@@ -3,6 +3,9 @@
 import json
 import sys
 
+sample_size = 1000
+sample_count = 0
+
 threshold = 100
 
 inputfile = open('./statistics/agents.json', 'r')
@@ -48,7 +51,8 @@ for value in obj:
     if 'build' in value['useragent']:
         del value['useragent']['build']
 
-    if count > threshold:
+    if count > threshold and sample_count < sample_size:
+        sample_count +=1
         agents_count += count
         unique_agents_count += 1
 
@@ -94,7 +98,7 @@ os_lookup = {v: k for k, v in os_lookup.items()}
 os_name_lookup = {v: k for k, v in os_name_lookup.items()}
 name_lookup = {v: k for k, v in name_lookup.items()}
 
-outputfile = open('./config/agents_data.js', 'w')
+outputfile = open('./config/agents_data_sample.js', 'w')
 
 outputfile.write("/* Items in the agents list has the following structure: [<count>, <agent>, <useragent.os lookup id>, <useragent.os_name lookup id>, <useragent.name lookup id>] */\n\n")
 outputfile.write("module.exports.agents = ")

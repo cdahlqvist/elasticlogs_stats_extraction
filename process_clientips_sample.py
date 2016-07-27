@@ -6,6 +6,9 @@ import re
 
 threshold = 500
 
+sample_size = 1000
+sample_count = 0
+
 inputfile = open('./statistics/clientips.json', 'r')
 
 data = inputfile.read()
@@ -110,6 +113,7 @@ for value in obj:
             else:
                 rare_clientips_lookup[ip_prefix][country_id] = { 'count': count, 'locations': [location_id] }
 
+
 # Reverse lookups
 country_lookup = {v: k for k, v in country_lookup.items()}
 
@@ -120,7 +124,7 @@ for prefix in rare_clientips_lookup:
 
 total = clientip_count + rare_count
 
-outputfile = open('./config/clientips_data.js', 'w')
+outputfile = open('./config/clientips_data_sample.js', 'w')
 
 outputfile.write("/* Items in the clientips list has the following structure: [<count>, <ip>, <geoip.country_name lookup id>, <geoip.location lookup id>, <useragent.name lookup id>] */\n\n")
 outputfile.write("module.exports.clientips = ")
