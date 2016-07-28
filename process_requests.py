@@ -4,7 +4,7 @@ import json
 import sys
 import re
 
-threshold = 200
+threshold = 100
 
 inputfile = open('./statistics/requests.json', 'r')
 
@@ -20,12 +20,14 @@ unique_requests_count = 0
 requests_count = 0
 unique_filtered_count = 0
 filtered_count = 0
+filtered_200_count = 0
+filtered_404_count = 0
 
 for value in obj:
     count = value['count']
     value.pop('count', None)
 
-    if count > threshold or (count> 10 and value['response'] != 200):
+    if count > threshold or (count > 2 and value['response'] != 200):
         requests_count += count
         unique_requests_count += 1
 
@@ -52,7 +54,13 @@ for value in obj:
 
     else:
         filtered_count += count
-        unique_filtered_count += count
+        unique_filtered_count += 1
+
+        if value['response'] == 200:
+            filtered_200_count += 1
+
+        if value['response'] == 404:
+            filtered_404_count += 1
 
 # Reverse lookups
 path_lookup = {v: k for k, v in path_lookup.items()}
@@ -72,6 +80,8 @@ total = requests_count + filtered_count
 
 sys.stdout.write('Unique requests count: {}\n'.format(unique_requests_count))
 sys.stdout.write('Unique filtered count: {}\n'.format(unique_filtered_count))
+sys.stdout.write('Filtered 200 count: {}\n'.format(filtered_200_count))
+sys.stdout.write('Filtered 404 count: {}\n'.format(filtered_404_count))
 sys.stdout.write('Requests count: {} ({})\n'.format(requests_count, requests_count * 100.0 / total))
 sys.stdout.write('Filtered count: {} ({})\n'.format(filtered_count, filtered_count * 100.0 / total))
 

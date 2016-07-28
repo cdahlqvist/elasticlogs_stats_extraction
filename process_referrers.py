@@ -4,7 +4,7 @@ import json
 import sys
 import re
 
-threshold = 200
+threshold = 100
 
 inputfile = open('./statistics/referrers.json', 'r')
 
@@ -52,7 +52,7 @@ for value in obj:
 
     else:
         filtered_count += count
-        unique_filtered_count += count
+        unique_filtered_count += 1
 
 # Reverse lookups
 path_lookup = {v: k for k, v in path_lookup.items()}
