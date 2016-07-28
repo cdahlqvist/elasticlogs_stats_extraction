@@ -4,7 +4,7 @@ import json
 import sys
 import re
 
-threshold = 200
+threshold = 50
 
 sample_size = 1000
 sample_count = 0
@@ -30,7 +30,7 @@ for value in obj:
     count = value['count']
     value.pop('count', None)
 
-    if (count > threshold or (count> 10 and value['response'] != 200)) and sample_count < sample_size:
+    if (count > threshold or (count > 2 and value['response'] != 200)) and sample_count < sample_size:
         sample_count += 1
         requests_count += count
         unique_requests_count += 1

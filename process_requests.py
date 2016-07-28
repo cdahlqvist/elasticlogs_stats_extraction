@@ -4,7 +4,7 @@ import json
 import sys
 import re
 
-threshold = 100
+threshold = 50
 
 inputfile = open('./statistics/requests.json', 'r')
 
