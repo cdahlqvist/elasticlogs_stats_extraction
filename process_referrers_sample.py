@@ -50,9 +50,7 @@ for value in obj:
             path_id = str(path_lookup_id)
             path_lookup_id += 1
 
-        item = [count, path_id, rest]
-
-        referrers.append(item)
+        referrers.append([count, [path_id, rest]])
 
     else:
         filtered_count += count
@@ -63,7 +61,7 @@ path_lookup = {v: k for k, v in path_lookup.items()}
 
 outputfile = open('./config/referrers_data_sample.js', 'w')
 
-outputfile.write("/* Items in the referrers list has the following structure: [<count>, <url lookup id>, <url suffix>] */\n\n")
+outputfile.write("/* Items in the referrers list has the following structure: [<count>, [<url lookup id>, <url suffix>]] */\n\n")
 outputfile.write("module.exports.referrers = ")
 outputfile.write(json.dumps(referrers, separators=(',', ':')))
 outputfile.write(";\n\nmodule.exports.url_base_lookup = ")

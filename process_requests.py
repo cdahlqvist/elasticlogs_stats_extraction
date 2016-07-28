@@ -48,7 +48,7 @@ for value in obj:
             path_id = str(path_lookup_id)
             path_lookup_id += 1
 
-        item = [count, path_id, rest, value['bytes'], value['verb'], value['response'], value['httpversion']]
+        item = [count, [path_id, rest, value['bytes'], value['verb'], value['response'], value['httpversion']]]
 
         requests.append(item)
 
@@ -67,7 +67,7 @@ path_lookup = {v: k for k, v in path_lookup.items()}
 
 outputfile = open('./config/requests_data.js', 'w')
 
-outputfile.write("/* Items in the requests list has the following structure: [<count>, <url base lookup id, <url suffix>, <bytes>, <verb> <response>, <httpversion>] */\n\n")
+outputfile.write("/* Items in the requests list has the following structure: [<count>, [<url base lookup id, <url suffix>, <bytes>, <verb> <response>, <httpversion>]] */\n\n")
 outputfile.write("module.exports.requests = ")
 outputfile.write(json.dumps(requests, separators=(',', ':')))
 outputfile.write(";\n\nmodule.exports.url_base_lookup = ")

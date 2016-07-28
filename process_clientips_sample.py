@@ -46,7 +46,7 @@ for value in obj:
 
             ip_prefix = m.groups(1)[0] + ".0"
 
-            item = [count, ip_prefix]
+            item = [ip_prefix]
 
             if 'country_name' in value['geoip']:
                 if value['geoip']['country_name'] in country_lookup:
@@ -70,7 +70,7 @@ for value in obj:
                     item.append(str(location_lookup_id))
                     location_lookup_id += 1
 
-            clientips.append(item)
+            clientips.append([count, item])
 
         else:
             rare_count += count
@@ -117,14 +117,14 @@ country_lookup = {v: k for k, v in country_lookup.items()}
 # Convert rare clientips lookup to list
 rare_clientips = []
 for prefix in rare_clientips_lookup:
-    rare_clientips.append([rare_clientips_lookup[prefix]['count'], rare_clientips_lookup[prefix]['prefix'], rare_clientips_lookup[prefix]['country_id'], rare_clientips_lookup[prefix]['location_id']])
+    rare_clientips.append([rare_clientips_lookup[prefix]['count'], [rare_clientips_lookup[prefix]['prefix'], rare_clientips_lookup[prefix]['country_id'], rare_clientips_lookup[prefix]['location_id']]])
 
 total = clientip_count + rare_count
 rare_probability = rare_count * 1.0 / total
 
 outputfile = open('./config/clientips_data_sample.js', 'w')
 
-outputfile.write("/* Items in the clientips list has the following structure: [<count>, <ip>, <geoip.country_name lookup id>, <geoip.location lookup id>, <useragent.name lookup id>] */\n\n")
+outputfile.write("/* Items in the clientips and rare_clientips list has the following structure: [<count>, [<ip_prefix>, <geoip.country_name lookup id>, <geoip.location lookup id>]] */\n\n")
 outputfile.write("module.exports.clientips = ")
 outputfile.write(json.dumps(clientips, separators=(',', ':')))
 outputfile.write(";\n\nmodule.exports.rare_clientips = ")

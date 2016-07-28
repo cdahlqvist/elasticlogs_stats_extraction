@@ -52,7 +52,7 @@ for value in obj:
         agents_count += count
         unique_agents_count += 1
 
-        item = [count, value['agent']]
+        item = [value['agent']]
 
         if 'os' in value['useragent']:
             if value['useragent']['os'] in os_lookup:
@@ -84,7 +84,7 @@ for value in obj:
         else:
             item.append('')
 
-        agents.append(item)
+        agents.append([count, item])
 
     else:
         filtered_count += count
@@ -96,7 +96,7 @@ name_lookup = {v: k for k, v in name_lookup.items()}
 
 outputfile = open('./config/agents_data.js', 'w')
 
-outputfile.write("/* Items in the agents list has the following structure: [<count>, <agent>, <useragent.os lookup id>, <useragent.os_name lookup id>, <useragent.name lookup id>] */\n\n")
+outputfile.write("/* Items in the agents list has the following structure: [<count>, [<agent>, <useragent.os lookup id>, <useragent.os_name lookup id>, <useragent.name lookup id>]] */\n\n")
 outputfile.write("module.exports.agents = ")
 outputfile.write(json.dumps(agents, separators=(',', ':')))
 outputfile.write(";\n\nmodule.exports.os_lookup = ")
