@@ -4,9 +4,9 @@ import json
 import sys
 import re
 
-threshold = 500
+threshold = 300
 
-sample_size = 1000
+sample_size = 10000
 sample_count = 0
 
 inputfile = open('./statistics/clientips.json', 'r')
@@ -41,7 +41,12 @@ for value in obj:
             unique_clientip_count += 1
             clientip_count += count
 
-            item = [count, value['clientip']]
+            # Mask client IP
+            m = re.match("^(\d{1,3}\.\d{1,3}\.\d{1,3})\.", value['clientip'])
+
+            ip_prefix = m.groups(1)[0] + ".0"
+
+            item = [count, ip_prefix]
 
             if 'country_name' in value['geoip']:
                 if value['geoip']['country_name'] in country_lookup:
@@ -73,7 +78,7 @@ for value in obj:
 
             m = re.match("^(\d{1,3}\.\d{1,3})\.", value['clientip'])
 
-            ip_prefix = m.groups(1)
+            ip_prefix = m.groups(1)[0]
 
             if 'country_name' in value['geoip']:
                 if value['geoip']['country_name'] in country_lookup:
@@ -103,16 +108,8 @@ for value in obj:
 
             rare_clientips_lookup[ip_prefix]['count'] += count
             rare_clientips_lookup[ip_prefix]['prefix'] = ip_prefix
-
-            if country_id in rare_clientips_lookup[ip_prefix]:
-                rare_clientips_lookup[ip_prefix][country_id]['count'] += count
-
-                if location_id not in rare_clientips_lookup[ip_prefix][country_id]['locations']:
-                    rare_clientips_lookup[ip_prefix][country_id]['locations'].append(location_id)
-
-            else:
-                rare_clientips_lookup[ip_prefix][country_id] = { 'count': count, 'locations': [location_id] }
-
+            rare_clientips_lookup[ip_prefix]['country_id'] = country_id
+            rare_clientips_lookup[ip_prefix]['location_id'] = location_id
 
 # Reverse lookups
 country_lookup = {v: k for k, v in country_lookup.items()}
@@ -120,9 +117,10 @@ country_lookup = {v: k for k, v in country_lookup.items()}
 # Convert rare clientips lookup to list
 rare_clientips = []
 for prefix in rare_clientips_lookup:
-    rare_clientips.append(rare_clientips_lookup[prefix])
+    rare_clientips.append([rare_clientips_lookup[prefix]['count'], rare_clientips_lookup[prefix]['prefix'], rare_clientips_lookup[prefix]['country_id'], rare_clientips_lookup[prefix]['location_id']])
 
 total = clientip_count + rare_count
+rare_probability = rare_count * 1.0 / total
 
 outputfile = open('./config/clientips_data_sample.js', 'w')
 
@@ -135,15 +133,15 @@ outputfile.write(";\n\nmodule.exports.country_lookup = ")
 outputfile.write(json.dumps(country_lookup, separators=(',', ':')))
 outputfile.write(";\n\nmodule.exports.location_lookup = ")
 outputfile.write(json.dumps(location_lookup, separators=(',', ':')))
-outputfile.write(";\n\nmodule.exports.rare_clientip_probability = {};".format(rare_count/total))
+outputfile.write(";\n\nmodule.exports.rare_clientip_probability = {};".format(rare_probability))
 
 outputfile.close()
 
 sys.stdout.write('Count threshold: {}\n'.format(threshold))
 sys.stdout.write('Unique agent count: {}\n'.format(unique_clientip_count))
 sys.stdout.write('Unique rare count: {}\n'.format(unique_rare_count))
-sys.stdout.write('Clientip count: {} ({})\n'.format(clientip_count, clientip_count * 100.0 / total))
-sys.stdout.write('Rare count: {} ({})\n'.format(rare_count, rare_count * 100.0 / total))
+sys.stdout.write('Clientip count: {} ({})\n'.format(clientip_count, (1.0 - rare_probability) * 100.0))
+sys.stdout.write('Rare count: {} ({})\n'.format(rare_count, rare_probability * 100.0))
 sys.stdout.write('Rare prefix count: {}\n'.format(prefix_count))
 
 #x [0,1]
